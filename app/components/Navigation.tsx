@@ -20,7 +20,7 @@ export default function Navigation() {
 			<nav className="main-nav">
 				<ul>
 					<li className={pathname === "/" ? "active" : ""}>
-						<Link href="/">&nbsp; &nbsp;ALOITUS</Link>
+						<Link href="/">ALOITUS</Link>
 					</li>
 					<li
 						className={`dropdown ${
@@ -31,11 +31,7 @@ export default function Navigation() {
 						onMouseEnter={() => setShowVihkiDropdown(true)}
 						onMouseLeave={() => setShowVihkiDropdown(false)}
 					>
-						<Link href="/sormukset">
-							VIHKI/TIMANTTI
-							<br />
-							&emsp; &emsp; &emsp; SORMUKSET &emsp;
-						</Link>
+						<Link href="/sormukset">VIHKI/TIMANTTISORMUKSET</Link>
 						<div
 							className="dropdown-content"
 							style={{
@@ -70,9 +66,7 @@ export default function Navigation() {
 						onMouseLeave={() => setShowMuutDropdown(false)}
 					>
 						<Link href="/muut-timanttikorut">
-							&emsp; &nbsp; &nbsp;MUUT
-							<br />
-							&emsp; &nbsp; TIMANTTIKORUT &emsp;
+							MUUT TIMANTTIKORUT
 						</Link>
 						<div
 							className="dropdown-content"
@@ -96,11 +90,7 @@ export default function Navigation() {
 							pathname === "/Kulta_korvakorut" ? "active" : ""
 						}
 					>
-						<Link href="/kulta-korvakorut">
-							&nbsp;&nbsp; &nbsp;KULTA
-							<br />
-							&emsp; &nbsp;KORVAKORUT
-						</Link>
+						<Link href="/kulta-korvakorut">KULTA KORVAKORUT</Link>
 					</li>
 					<li className={pathname === "/Kastelahjat" ? "active" : ""}>
 						<Link href="/kastelahjat"> KASTELAHJAT </Link>
