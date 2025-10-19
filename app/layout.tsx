@@ -29,10 +29,10 @@ export default function RootLayout({
 				<link rel="apple-touch-icon" href="/images/icon_192x192.png" />
 				<link rel="icon" href="/images/icon.png" />
 			</head>
-			<body>
-				<div id="wrapper">
+			<body className="min-h-screen flex flex-col">
+				<div id="wrapper" className="flex-1 flex flex-col">
 					<Header />
-					{children}
+					<main className="flex-1 flex flex-col">{children}</main>
 					<Footer />
 				</div>
 			</body>

@@ -16,17 +16,13 @@ export default function VihkiJaTimanttiSormukset() {
 	}, [searchParams])
 
 	return (
-		<main>
-			<article>
-				<Image
-					loading="lazy"
-					src={`/images/Vihki_timantti/${selectedRing}_syksy25.jpg`}
-					alt={`Ring collection ${selectedRing}`}
-					width={1000}
-					height={600}
-					style={{ maxWidth: "100%", height: "auto" }}
-				/>
-			</article>
-		</main>
+		<Image
+			loading="lazy"
+			src={`/images/Vihki_timantti/${selectedRing}_syksy25.jpg`}
+			alt={`Ring collection ${selectedRing}`}
+			width={1000}
+			height={600}
+			style={{ maxWidth: "100%", height: "auto" }}
+		/>
 	)
 }

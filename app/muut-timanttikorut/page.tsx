@@ -18,19 +18,13 @@ export default function MuutTimanttikorut() {
 	}, [searchParams])
 
 	return (
-		<main>
-			<div className="line"></div>
-			<article>
-				<Image
-					loading="lazy"
-					src={`/images/Muut_timanttikorut/${selectedJewelry}.jpg`}
-					alt={`Jewelry collection ${selectedJewelry}`}
-					width={1000}
-					height={600}
-					style={{ maxWidth: "100%", height: "auto" }}
-				/>
-			</article>
-			<aside></aside>
-		</main>
+		<Image
+			loading="lazy"
+			src={`/images/Muut_timanttikorut/${selectedJewelry}.jpg`}
+			alt={`Jewelry collection ${selectedJewelry}`}
+			width={1000}
+			height={600}
+			style={{ maxWidth: "100%", height: "auto" }}
+		/>
 	)
 }

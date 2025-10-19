@@ -8,6 +8,9 @@ export default function Navigation() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false)
 	const [showVihkiDropdown, setShowVihkiDropdown] = useState(false)
 	const [showMuutDropdown, setShowMuutDropdown] = useState(false)
+	const [showMobileRingsDropdown, setShowMobileRingsDropdown] =
+		useState(false)
+	const [showMobileMuutDropdown, setShowMobileMuutDropdown] = useState(false)
 	const pathname = usePathname()
 
 	const toggleMenu = () => {
@@ -17,7 +20,7 @@ export default function Navigation() {
 	return (
 		<>
 			{/* Desktop Navigation */}
-			<nav className="main-nav">
+			<nav className="main-nav hidden md:block">
 				<ul>
 					<li className={pathname === "/" ? "active" : ""}>
 						<Link href="/">ALOITUS</Link>
@@ -106,27 +109,169 @@ export default function Navigation() {
 			</nav>
 
 			{/* Mobile Navigation */}
-			<div
-				className={`topnav ${isMenuOpen ? "responsive" : ""}`}
-				id="myTopnav"
-			>
-				<Link href="/">ALOITUS</Link>
-				<Link href="/vihki_ja_timantti_sormukset">
-					VIHKI/TIMANTTI SORMUKSET
-				</Link>
-				<Link href="/muut_timanttikorut">MUUT TIMANTTIKORUT</Link>
-				<Link href="/Kulta_korvakorut">KULTA KORVAKORUT</Link>
-				<Link href="/Kastelahjat">KASTELAHJAT</Link>
-				<Link href="/jalleenmyyjat">JÄLLEENMYYJÄT</Link>
-				<button className="icon" onClick={toggleMenu}>
-					<i
-						className={
-							isMenuOpen
-								? "fa-solid fa-xmark"
-								: "fa-solid fa-bars"
-						}
-					></i>
-				</button>
+			<div className="md:hidden bg-[#ada7f8] p-2 sticky top-0 z-50">
+				<div className="flex justify-between items-center">
+					<Link
+						href="/"
+						className="block py-2 px-4 text-gray-800 hover:bg-purple-400 hover:text-white transition-colors"
+						onClick={() => setIsMenuOpen(false)}
+					>
+						ALOITUS
+					</Link>
+					<button
+						onClick={toggleMenu}
+						className="p-2 text-gray-800 hover:text-white transition-colors"
+					>
+						<i
+							className={
+								isMenuOpen
+									? "fa-solid fa-xmark text-xl"
+									: "fa-solid fa-bars text-xl"
+							}
+						></i>
+					</button>
+				</div>
+
+				{/* Mobile Menu Links */}
+				<div
+					className={`${
+						isMenuOpen ? "block" : "hidden"
+					} mt-4 space-y-2`}
+				>
+					{/* Rings Section */}
+					<div>
+						<button
+							onClick={() =>
+								setShowMobileRingsDropdown(
+									!showMobileRingsDropdown
+								)
+							}
+							className="w-full text-left py-2 px-4 text-gray-800 hover:bg-purple-400 hover:text-white transition-colors flex justify-between items-center"
+						>
+							VIHKI/TIMANTTISORMUKSET
+							<i
+								className={`fa-solid fa-chevron-down transition-transform ${
+									showMobileRingsDropdown ? "rotate-180" : ""
+								}`}
+							></i>
+						</button>
+						<div
+							className={`ml-4 space-y-1 ${
+								showMobileRingsDropdown ? "block" : "hidden"
+							}`}
+						>
+							<Link
+								href="/sormukset?ring=9161-9172"
+								className="block py-1 px-4 text-sm text-gray-700 hover:bg-purple-400 hover:text-white transition-colors"
+								onClick={() => setIsMenuOpen(false)}
+							>
+								9161-9172
+							</Link>
+							<Link
+								href="/sormukset?ring=9127-9159"
+								className="block py-1 px-4 text-sm text-gray-700 hover:bg-purple-400 hover:text-white transition-colors"
+								onClick={() => setIsMenuOpen(false)}
+							>
+								9127-9159
+							</Link>
+							<Link
+								href="/sormukset?ring=9100-9126"
+								className="block py-1 px-4 text-sm text-gray-700 hover:bg-purple-400 hover:text-white transition-colors"
+								onClick={() => setIsMenuOpen(false)}
+							>
+								9100-9126
+							</Link>
+							<Link
+								href="/sormukset?ring=9069-9099"
+								className="block py-1 px-4 text-sm text-gray-700 hover:bg-purple-400 hover:text-white transition-colors"
+								onClick={() => setIsMenuOpen(false)}
+							>
+								9069-9099
+							</Link>
+							<Link
+								href="/sormukset?ring=9047-9068"
+								className="block py-1 px-4 text-sm text-gray-700 hover:bg-purple-400 hover:text-white transition-colors"
+								onClick={() => setIsMenuOpen(false)}
+							>
+								9047-9068
+							</Link>
+							<Link
+								href="/sormukset?ring=9013-9046"
+								className="block py-1 px-4 text-sm text-gray-700 hover:bg-purple-400 hover:text-white transition-colors"
+								onClick={() => setIsMenuOpen(false)}
+							>
+								9013-9046
+							</Link>
+						</div>
+					</div>
+
+					{/* Muut Timanttikorut Section */}
+					<div>
+						<button
+							onClick={() =>
+								setShowMobileMuutDropdown(
+									!showMobileMuutDropdown
+								)
+							}
+							className="w-full text-left py-2 px-4 text-gray-800 hover:bg-purple-400 hover:text-white transition-colors flex justify-between items-center"
+						>
+							MUUT TIMANTTIKORUT
+							<i
+								className={`fa-solid fa-chevron-down transition-transform ${
+									showMobileMuutDropdown ? "rotate-180" : ""
+								}`}
+							></i>
+						</button>
+						<div
+							className={`ml-4 space-y-1 ${
+								showMobileMuutDropdown ? "block" : "hidden"
+							}`}
+						>
+							<Link
+								href="/muut-timanttikorut?jewelry=Tappikorvakorut_syksy25"
+								className="block py-1 px-4 text-sm text-gray-700 hover:bg-purple-400 hover:text-white transition-colors"
+								onClick={() => setIsMenuOpen(false)}
+							>
+								Tappikorvakorut
+							</Link>
+							<Link
+								href="/muut-timanttikorut?jewelry=Muut_korvakorut_syksy25"
+								className="block py-1 px-4 text-sm text-gray-700 hover:bg-purple-400 hover:text-white transition-colors"
+								onClick={() => setIsMenuOpen(false)}
+							>
+								Muut Korvakorut
+							</Link>
+							<Link
+								href="/muut-timanttikorut?jewelry=Timantti_Riipukset_syksy25"
+								className="block py-1 px-4 text-sm text-gray-700 hover:bg-purple-400 hover:text-white transition-colors"
+								onClick={() => setIsMenuOpen(false)}
+							>
+								Timanttiriipukset
+							</Link>
+						</div>
+					</div>
+					<Link
+						href="/kulta-korvakorut"
+						className="block py-2 px-4 text-gray-800 hover:bg-purple-400 hover:text-white transition-colors"
+						onClick={() => setIsMenuOpen(false)}
+					>
+						KULTA KORVAKORUT
+					</Link>
+					<Link
+						href="/kastelahjat"
+						className="block py-2 px-4 text-gray-800 hover:bg-purple-400 hover:text-white transition-colors"
+						onClick={() => setIsMenuOpen(false)}
+					>
+						KASTELAHJAT
+					</Link>
+					<Link
+						href="/jalleenmyyjat"
+						className="block py-2 px-4 text-gray-800 hover:bg-purple-400 hover:text-white transition-colors"
+						onClick={() => setIsMenuOpen(false)}
+					>
+						JÄLLEENMYYJÄT
+					</Link>
+				</div>
 			</div>
 		</>
 	)
