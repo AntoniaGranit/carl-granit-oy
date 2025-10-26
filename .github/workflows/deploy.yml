@@ -172,8 +172,15 @@ jobs:
                       tar -xzf /tmp/deployment.tar.gz
 
                       # Install dependencies
-                      if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ] || [ -f yarn.lock ]; then
+                      if [ -f pnpm-lock.yaml ]; then
+                        # Install pnpm if not available
+                        npm install -g pnpm
+                        pnpm install --production
+                      elif [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
                         npm ci --production
+                      elif [ -f yarn.lock ]; then
+                        npm install -g yarn
+                        yarn install --production
                       else
                         npm install --production
                       fi
@@ -193,7 +200,31 @@ jobs:
                   key: ${{ secrets.SERVER_SSH_KEY }}
                   passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
                   script: |
-                      # Start the service
+                      # Create systemd service file
+                      cat > /etc/systemd/system/${{ env.APP_NAME }}.service << 'SERVICE_EOF'
+                      [Unit]
+                      Description=Carl Granit Oy Next.js Application
+                      After=network.target
+
+                      [Service]
+                      Type=simple
+                      User=www-data
+                      WorkingDirectory=${{ env.APP_DIR }}
+                      Environment=NODE_ENV=production
+                      Environment=PORT=3000
+                      ExecStart=/usr/bin/pnpm start
+                      Restart=always
+                      RestartSec=10
+                      StandardOutput=syslog
+                      StandardError=syslog
+                      SyslogIdentifier=${{ env.APP_NAME }}
+
+                      [Install]
+                      WantedBy=multi-user.target
+                      SERVICE_EOF
+
+                      # Reload systemd and start the service
+                      systemctl daemon-reload
                       systemctl start ${{ env.APP_NAME }}
                       systemctl enable ${{ env.APP_NAME }}
 
