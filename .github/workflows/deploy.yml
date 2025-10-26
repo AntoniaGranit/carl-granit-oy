@@ -173,9 +173,11 @@ jobs:
 
                       # Install dependencies
                       if [ -f pnpm-lock.yaml ]; then
-                        # Install pnpm if not available
+                        # Install pnpm and use it for installation
                         npm install -g pnpm
                         pnpm install --production
+                        # Also create package-lock.json for npm compatibility
+                        pnpm import
                       elif [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
                         npm ci --production
                       elif [ -f yarn.lock ]; then
@@ -212,11 +214,11 @@ jobs:
                       WorkingDirectory=${{ env.APP_DIR }}
                       Environment=NODE_ENV=production
                       Environment=PORT=3000
-                      ExecStart=/usr/bin/pnpm start
+                      ExecStart=/usr/bin/npm start
                       Restart=always
                       RestartSec=10
-                      StandardOutput=syslog
-                      StandardError=syslog
+                      StandardOutput=journal
+                      StandardError=journal
                       SyslogIdentifier=${{ env.APP_NAME }}
 
                       [Install]
