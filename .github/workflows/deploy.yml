@@ -91,7 +91,9 @@ jobs:
 
             - name: Create deployment package
               run: |
-                  # Create deployment package with specific includes
+                  # Create deployment package with files that actually exist
+                  echo "Creating deployment package..."
+
                   tar -czf deployment.tar.gz \
                     --exclude=node_modules \
                     --exclude=.git \
@@ -108,12 +110,21 @@ jobs:
                     --exclude=.env.development.local \
                     --exclude=.env.test.local \
                     --exclude=.env.production.local \
-                    app/ pages/ components/ lib/ public/ styles/ \
-                    package.json package-lock.json next.config.js next.config.mjs \
-                    tsconfig.json tailwind.config.js tailwind.config.ts \
-                    postcss.config.js postcss.config.mjs \
-                    .eslintrc.json .eslintrc.js .eslintrc.mjs \
+                    --exclude=terraform \
+                    --exclude=terraform.tfstate \
+                    app/ \
+                    public/ \
+                    .next/ \
+                    package.json \
+                    pnpm-lock.yaml \
+                    next.config.ts \
+                    tsconfig.json \
+                    postcss.config.mjs \
+                    next-env.d.ts \
                     README.md
+
+                  echo "Deployment package created successfully"
+                  ls -la deployment.tar.gz
 
             - name: Deploy to server
               uses: appleboy/ssh-action@v1.0.3
