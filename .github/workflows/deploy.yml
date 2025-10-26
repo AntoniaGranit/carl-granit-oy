@@ -116,7 +116,6 @@ jobs:
                     public/ \
                     .next/ \
                     package.json \
-                    pnpm-lock.yaml \
                     next.config.ts \
                     tsconfig.json \
                     postcss.config.mjs \
@@ -172,13 +171,7 @@ jobs:
                       tar -xzf /tmp/deployment.tar.gz
 
                       # Install dependencies
-                      if [ -f pnpm-lock.yaml ]; then
-                        # Install pnpm and use it for installation
-                        npm install -g pnpm
-                        pnpm install --production
-                        # Also create package-lock.json for npm compatibility
-                        pnpm import
-                      elif [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+                      if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
                         npm ci --production
                       elif [ -f yarn.lock ]; then
                         npm install -g yarn
