@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
 
-export default function MuutTimanttikorut() {
+function MuutTimanttikorutContent() {
 	const searchParams = useSearchParams()
 	const [selectedJewelry, setSelectedJewelry] = useState(
 		"Tappikorvakorut_syksy25"
@@ -26,5 +26,13 @@ export default function MuutTimanttikorut() {
 			height={600}
 			style={{ maxWidth: "100%", height: "auto" }}
 		/>
+	)
+}
+
+export default function MuutTimanttikorut() {
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<MuutTimanttikorutContent />
+		</Suspense>
 	)
 }
