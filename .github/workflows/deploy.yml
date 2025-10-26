@@ -132,6 +132,7 @@ jobs:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
+                  passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
                   script: |
                       # Create backup
                       if [ -d "${{ env.APP_DIR }}" ]; then
@@ -153,6 +154,7 @@ jobs:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
+                  passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
                   source: "deployment.tar.gz"
                   target: "/tmp/"
 
@@ -162,6 +164,7 @@ jobs:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
+                  passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
                   script: |
                       cd ${{ env.APP_DIR }}
 
@@ -188,6 +191,7 @@ jobs:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
+                  passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
                   script: |
                       # Start the service
                       systemctl start ${{ env.APP_NAME }}
@@ -211,6 +215,7 @@ jobs:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
+                  passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
                   script: |
                       # Wait a bit more for the app to fully start
                       sleep 5
