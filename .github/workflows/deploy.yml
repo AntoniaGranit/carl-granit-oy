@@ -1,0 +1,181 @@
+name: Deploy to Production Server
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+
+env:
+    NODE_VERSION: "20.x"
+    APP_NAME: "carl-granit-oy"
+    APP_DIR: "/var/www/carl-granit-oy"
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run linting
+              run: npm run lint --if-present
+
+            - name: Run type checking
+              run: npm run type-check --if-present
+
+            - name: Run tests
+              run: npm test --if-present
+
+            - name: Build application
+              run: npm run build
+
+    deploy:
+        needs: test
+        runs-on: ubuntu-latest
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build application
+              run: npm run build
+
+            - name: Create deployment package
+              run: |
+                  tar -czf deployment.tar.gz \
+                    --exclude=node_modules \
+                    --exclude=.git \
+                    --exclude=.github \
+                    --exclude=.next/cache \
+                    --exclude=*.log \
+                    .
+
+            - name: Deploy to server
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      # Create backup
+                      if [ -d "${{ env.APP_DIR }}" ]; then
+                        BACKUP_NAME="backup-$(date +%Y%m%d-%H%M%S)"
+                        mkdir -p /var/backups/${{ env.APP_NAME }}
+                        cp -r ${{ env.APP_DIR }} /var/backups/${{ env.APP_NAME }}/$BACKUP_NAME
+                        echo "Backup created: /var/backups/${{ env.APP_NAME }}/$BACKUP_NAME"
+                      fi
+
+                      # Stop the service
+                      systemctl stop ${{ env.APP_NAME }} || true
+
+                      # Create app directory if it doesn't exist
+                      mkdir -p ${{ env.APP_DIR }}
+
+            - name: Upload deployment package
+              uses: appleboy/scp-action@v0.1.7
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  source: "deployment.tar.gz"
+                  target: "/tmp/"
+
+            - name: Extract and setup application
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      cd ${{ env.APP_DIR }}
+
+                      # Extract new code
+                      tar -xzf /tmp/deployment.tar.gz
+
+                      # Install dependencies
+                      npm ci --production
+
+                      # Set proper permissions
+                      chown -R www-data:www-data ${{ env.APP_DIR }}
+                      chmod -R 755 ${{ env.APP_DIR }}
+
+                      # Clean up
+                      rm /tmp/deployment.tar.gz
+
+            - name: Start application
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      # Start the service
+                      systemctl start ${{ env.APP_NAME }}
+                      systemctl enable ${{ env.APP_NAME }}
+
+                      # Wait for service to start
+                      sleep 10
+
+                      # Check service status
+                      if systemctl is-active --quiet ${{ env.APP_NAME }}; then
+                        echo "✅ Service started successfully!"
+                      else
+                        echo "❌ Failed to start service"
+                        journalctl -u ${{ env.APP_NAME }} --no-pager -l
+                        exit 1
+                      fi
+
+            - name: Health check
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      # Wait a bit more for the app to fully start
+                      sleep 5
+
+                      # Test the application
+                      if curl -f http://localhost:3000/health > /dev/null 2>&1; then
+                        echo "✅ Application health check passed!"
+                      else
+                        echo "❌ Application health check failed"
+                        echo "Checking logs:"
+                        journalctl -u ${{ env.APP_NAME }} --no-pager -l --since "5 minutes ago"
+                        exit 1
+                      fi
+
+            - name: Notify deployment success
+              if: success()
+              run: |
+                  echo "🚀 Deployment successful!"
+                  echo "Application is available at: http://${{ secrets.SERVER_IP }}"
+                  echo "Service status:"
+                  curl -s http://${{ secrets.SERVER_IP }}/health || echo "Health endpoint not available"
+
+            - name: Notify deployment failure
+              if: failure()
+              run: |
+                  echo "❌ Deployment failed!"
+                  echo "Check the logs above for details"

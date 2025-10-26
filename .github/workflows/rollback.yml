@@ -1,0 +1,131 @@
+name: Rollback Deployment
+
+on:
+    workflow_dispatch:
+        inputs:
+            backup_name:
+                description: "Backup name to rollback to (e.g., backup-20241201-143022)"
+                required: true
+                type: string
+
+env:
+    APP_NAME: "carl-granit-oy"
+    APP_DIR: "/var/www/carl-granit-oy"
+    BACKUP_DIR: "/var/backups/carl-granit-oy"
+
+jobs:
+    rollback:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: List available backups
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      echo "Available backups:"
+                      ls -la ${{ env.BACKUP_DIR }} || echo "No backups found"
+
+            - name: Verify backup exists
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      if [ ! -d "${{ env.BACKUP_DIR }}/${{ github.event.inputs.backup_name }}" ]; then
+                        echo "❌ Backup ${{ github.event.inputs.backup_name }} not found!"
+                        echo "Available backups:"
+                        ls -la ${{ env.BACKUP_DIR }}
+                        exit 1
+                      fi
+                      echo "✅ Backup ${{ github.event.inputs.backup_name }} found"
+
+            - name: Create current state backup
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      # Create backup of current state before rollback
+                      CURRENT_BACKUP="rollback-backup-$(date +%Y%m%d-%H%M%S)"
+                      if [ -d "${{ env.APP_DIR }}" ]; then
+                        cp -r ${{ env.APP_DIR }} ${{ env.BACKUP_DIR }}/$CURRENT_BACKUP
+                        echo "✅ Current state backed up as: $CURRENT_BACKUP"
+                      fi
+
+            - name: Stop application
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      systemctl stop ${{ env.APP_NAME }} || true
+                      echo "✅ Application stopped"
+
+            - name: Perform rollback
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      # Remove current application
+                      rm -rf ${{ env.APP_DIR }}
+
+                      # Restore from backup
+                      cp -r ${{ env.BACKUP_DIR }}/${{ github.event.inputs.backup_name }} ${{ env.APP_DIR }}
+
+                      # Set proper permissions
+                      chown -R www-data:www-data ${{ env.APP_DIR }}
+                      chmod -R 755 ${{ env.APP_DIR }}
+
+                      echo "✅ Rollback completed"
+
+            - name: Start application
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      systemctl start ${{ env.APP_NAME }}
+                      systemctl enable ${{ env.APP_NAME }}
+
+                      # Wait for service to start
+                      sleep 10
+
+                      if systemctl is-active --quiet ${{ env.APP_NAME }}; then
+                        echo "✅ Application started successfully after rollback"
+                      else
+                        echo "❌ Failed to start application after rollback"
+                        journalctl -u ${{ env.APP_NAME }} --no-pager -l
+                        exit 1
+                      fi
+
+            - name: Health check
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      sleep 5
+
+                      if curl -f http://localhost:3000/health > /dev/null 2>&1; then
+                        echo "✅ Health check passed after rollback"
+                      else
+                        echo "❌ Health check failed after rollback"
+                        journalctl -u ${{ env.APP_NAME }} --no-pager -l --since "5 minutes ago"
+                        exit 1
+                      fi
+
+            - name: Notify rollback completion
+              if: success()
+              run: |
+                  echo "🔄 Rollback to ${{ github.event.inputs.backup_name }} completed successfully!"
+                  echo "Application is available at: http://${{ env.SERVER_IP }}"

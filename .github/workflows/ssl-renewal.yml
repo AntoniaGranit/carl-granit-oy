@@ -1,0 +1,58 @@
+name: SSL Certificate Renewal
+
+on:
+    schedule:
+        # Run every Monday at 2 AM UTC (checks if renewal is needed)
+        - cron: "0 2 * * 1"
+    workflow_dispatch:
+
+env:
+    DOMAIN: "your-domain.com" # Replace with your actual domain
+
+jobs:
+    renew-ssl:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Check SSL certificate expiry
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SERVER_IP }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      # Check if certificate needs renewal (expires in 30 days)
+                      if certbot certificates --domain ${{ env.DOMAIN }} | grep -q "VALID: 30 days"; then
+                        echo "Certificate expires in 30 days or less, attempting renewal..."
+                        
+                        # Attempt renewal
+                        if certbot renew --quiet --non-interactive; then
+                          echo "✅ SSL certificate renewed successfully!"
+                          
+                          # Reload nginx
+                          systemctl reload nginx
+                          echo "✅ Nginx reloaded with new certificate"
+                          
+                          # Test the site
+                          if curl -f https://${{ env.DOMAIN }} > /dev/null 2>&1; then
+                            echo "✅ Site is accessible with new certificate"
+                          else
+                            echo "❌ Site is not accessible after renewal"
+                            exit 1
+                          fi
+                        else
+                          echo "❌ SSL certificate renewal failed"
+                          exit 1
+                        fi
+                      else
+                        echo "Certificate is still valid, no renewal needed"
+                      fi
+
+            - name: Notify renewal status
+              if: always()
+              run: |
+                  if [ "${{ job.status }}" == "success" ]; then
+                    echo "🔒 SSL certificate renewal completed successfully"
+                  else
+                    echo "⚠️ SSL certificate renewal had issues - check logs"
+                  fi
