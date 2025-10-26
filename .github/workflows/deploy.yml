@@ -91,13 +91,29 @@ jobs:
 
             - name: Create deployment package
               run: |
+                  # Create deployment package with specific includes
                   tar -czf deployment.tar.gz \
                     --exclude=node_modules \
                     --exclude=.git \
                     --exclude=.github \
                     --exclude=.next/cache \
                     --exclude=*.log \
-                    .
+                    --exclude=.DS_Store \
+                    --exclude=*.tmp \
+                    --exclude=coverage \
+                    --exclude=.nyc_output \
+                    --exclude=dist \
+                    --exclude=build \
+                    --exclude=.env.local \
+                    --exclude=.env.development.local \
+                    --exclude=.env.test.local \
+                    --exclude=.env.production.local \
+                    app/ pages/ components/ lib/ public/ styles/ \
+                    package.json package-lock.json next.config.js next.config.mjs \
+                    tsconfig.json tailwind.config.js tailwind.config.ts \
+                    postcss.config.js postcss.config.mjs \
+                    .eslintrc.json .eslintrc.js .eslintrc.mjs \
+                    README.md
 
             - name: Deploy to server
               uses: appleboy/ssh-action@v1.0.3
