@@ -60,6 +60,22 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
 
         steps:
+            - name: Validate required secrets
+              run: |
+                  if [ -z "${{ secrets.SERVER_IP }}" ]; then
+                    echo "❌ SERVER_IP secret is not set"
+                    exit 1
+                  fi
+                  if [ -z "${{ secrets.SERVER_USER }}" ]; then
+                    echo "❌ SERVER_USER secret is not set"
+                    exit 1
+                  fi
+                  if [ -z "${{ secrets.SERVER_SSH_KEY }}" ]; then
+                    echo "❌ SERVER_SSH_KEY secret is not set"
+                    exit 1
+                  fi
+                  echo "✅ All required secrets are present"
+
             - name: Checkout code
               uses: actions/checkout@v4
 
@@ -131,7 +147,6 @@ jobs:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
-                  passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
                   script: |
                       # Create backup
                       if [ -d "${{ env.APP_DIR }}" ]; then
@@ -153,7 +168,6 @@ jobs:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
-                  passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
                   source: "deployment.tar.gz"
                   target: "/tmp/"
 
@@ -163,7 +177,6 @@ jobs:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
-                  passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
                   script: |
                       cd ${{ env.APP_DIR }}
 
@@ -193,9 +206,15 @@ jobs:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
-                  passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
                   script: |
-                      # Create systemd service file
+                      # Stop and disable any existing service
+                      systemctl stop ${{ env.APP_NAME }} || true
+                      systemctl disable ${{ env.APP_NAME }} || true
+
+                      # Remove old service file completely
+                      rm -f /etc/systemd/system/${{ env.APP_NAME }}.service
+
+                      # Create new systemd service file with npm
                       cat > /etc/systemd/system/${{ env.APP_NAME }}.service << 'SERVICE_EOF'
                       [Unit]
                       Description=Carl Granit Oy Next.js Application
@@ -218,10 +237,19 @@ jobs:
                       WantedBy=multi-user.target
                       SERVICE_EOF
 
-                      # Reload systemd and start the service
+                      # Verify the service file was created correctly
+                      echo "Service file contents:"
+                      cat /etc/systemd/system/${{ env.APP_NAME }}.service
+
+                      # Reload systemd to clear any cached service definitions
                       systemctl daemon-reload
-                      systemctl start ${{ env.APP_NAME }}
+
+                      # Reset failed state if any
+                      systemctl reset-failed ${{ env.APP_NAME }} || true
+
+                      # Enable and start the service
                       systemctl enable ${{ env.APP_NAME }}
+                      systemctl start ${{ env.APP_NAME }}
 
                       # Wait for service to start
                       sleep 10
@@ -229,9 +257,14 @@ jobs:
                       # Check service status
                       if systemctl is-active --quiet ${{ env.APP_NAME }}; then
                         echo "✅ Service started successfully!"
+                        systemctl status ${{ env.APP_NAME }} --no-pager -l
                       else
                         echo "❌ Failed to start service"
-                        journalctl -u ${{ env.APP_NAME }} --no-pager -l
+                        echo "Service file:"
+                        cat /etc/systemd/system/${{ env.APP_NAME }}.service
+                        echo ""
+                        echo "Recent logs:"
+                        journalctl -u ${{ env.APP_NAME }} --no-pager -l --since "2 minutes ago"
                         exit 1
                       fi
 
@@ -241,7 +274,6 @@ jobs:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
-                  passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
                   script: |
                       # Wait a bit more for the app to fully start
                       sleep 5
