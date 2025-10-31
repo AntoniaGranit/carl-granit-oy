@@ -214,7 +214,7 @@ jobs:
                       # Remove old service file completely
                       rm -f /etc/systemd/system/${{ env.APP_NAME }}.service
 
-                      # Create new systemd service file with npm
+                      # Create new systemd service file with npm using /usr/bin/env to find npm in PATH
                       cat > /etc/systemd/system/${{ env.APP_NAME }}.service << 'SERVICE_EOF'
                       [Unit]
                       Description=Carl Granit Oy Next.js Application
@@ -223,15 +223,16 @@ jobs:
                       [Service]
                       Type=simple
                       User=www-data
-                      WorkingDirectory=${{ env.APP_DIR }}
+                      WorkingDirectory=/var/www/carl-granit-oy
                       Environment=NODE_ENV=production
                       Environment=PORT=3000
-                      ExecStart=/usr/bin/npm start
+                      Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/nodejs/npm/bin"
+                      ExecStart=/usr/bin/env npm start
                       Restart=always
                       RestartSec=10
                       StandardOutput=journal
                       StandardError=journal
-                      SyslogIdentifier=${{ env.APP_NAME }}
+                      SyslogIdentifier=carl-granit-oy
 
                       [Install]
                       WantedBy=multi-user.target
