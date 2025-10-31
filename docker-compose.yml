@@ -1,0 +1,11 @@
+services:
+    carl-granit-oy:
+        build: .
+        container_name: carl-granit-oy
+        ports:
+            - "3000:3000"
+        restart: unless-stopped
+        environment:
+            - NODE_ENV=production
+            - PORT=3000
+            - HOSTNAME=0.0.0.0

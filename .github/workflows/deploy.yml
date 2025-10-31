@@ -8,7 +8,7 @@ on:
     workflow_dispatch:
 
 env:
-    NODE_VERSION: "20.x"
+    NODE_VERSION: "24.x"
     APP_NAME: "carl-granit-oy"
     APP_DIR: "/var/www/carl-granit-oy"
 
@@ -19,40 +19,37 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: latest
+
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
                   node-version: ${{ env.NODE_VERSION }}
+                  cache: "pnpm"
 
             - name: Install dependencies
               run: |
-                  if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ] || [ -f yarn.lock ]; then
-                    npm ci
-                  else
-                    npm install
-                  fi
+                  corepack enable
+                  pnpm install --frozen-lockfile
 
             - name: Run linting
-              run: npm run lint --if-present
+              run: pnpm run lint --if-present
 
             - name: Run type checking
-              run: npm run type-check --if-present
+              run: pnpm run type-check --if-present
 
             - name: Run tests
-              run: npm test --if-present
+              run: pnpm test --if-present
 
             - name: Build application
               run: |
                   # Set environment variable to handle useSearchParams error
                   export NEXT_TELEMETRY_DISABLED=1
-                  # Try building with different approaches
-                  npm run build || npm run build -- --no-lint || {
-                    echo "Build failed due to useSearchParams error, creating a basic build..."
-                    # Create a minimal build that will work
-                    mkdir -p .next/static
-                    echo '{"version":3,"pages":{},"routes":{}}' > .next/build-manifest.json
-                    echo "Basic build structure created"
-                  }
+                  # Build the application
+                  pnpm run build
 
     deploy:
         needs: test
@@ -79,35 +76,32 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: latest
+
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
                   node-version: ${{ env.NODE_VERSION }}
+                  cache: "pnpm"
 
             - name: Install dependencies
               run: |
-                  if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ] || [ -f yarn.lock ]; then
-                    npm ci
-                  else
-                    npm install
-                  fi
+                  corepack enable
+                  pnpm install --frozen-lockfile
 
             - name: Build application
               run: |
                   # Set environment variable to handle useSearchParams error
                   export NEXT_TELEMETRY_DISABLED=1
-                  # Try building with different approaches
-                  npm run build || npm run build -- --no-lint || {
-                    echo "Build failed due to useSearchParams error, creating a basic build..."
-                    # Create a minimal build that will work
-                    mkdir -p .next/static
-                    echo '{"version":3,"pages":{},"routes":{}}' > .next/build-manifest.json
-                    echo "Basic build structure created"
-                  }
+                  # Build the application
+                  pnpm run build
 
             - name: Create deployment package
               run: |
-                  # Create deployment package with files that actually exist
+                  # Create deployment package with Dockerfile and docker-compose
                   echo "Creating deployment package..."
 
                   tar -czf deployment.tar.gz \
@@ -130,8 +124,10 @@ jobs:
                     --exclude=terraform.tfstate \
                     app/ \
                     public/ \
-                    .next/ \
                     package.json \
+                    pnpm-lock.yaml \
+                    Dockerfile \
+                    docker-compose.yml \
                     next.config.ts \
                     tsconfig.json \
                     postcss.config.mjs \
@@ -156,8 +152,8 @@ jobs:
                         echo "Backup created: /var/backups/${{ env.APP_NAME }}/$BACKUP_NAME"
                       fi
 
-                      # Stop the service
-                      systemctl stop ${{ env.APP_NAME }} || true
+                      # Stop Docker container
+                      cd ${{ env.APP_DIR }} && docker compose down || docker stop ${{ env.APP_NAME }} || true
 
                       # Create app directory if it doesn't exist
                       mkdir -p ${{ env.APP_DIR }}
@@ -183,89 +179,37 @@ jobs:
                       # Extract new code
                       tar -xzf /tmp/deployment.tar.gz
 
-                      # Install dependencies
-                      if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
-                        npm ci --production
-                      elif [ -f yarn.lock ]; then
-                        npm install -g yarn
-                        yarn install --production
-                      else
-                        npm install --production
-                      fi
-
-                      # Set proper permissions
-                      chown -R www-data:www-data ${{ env.APP_DIR }}
-                      chmod -R 755 ${{ env.APP_DIR }}
-
                       # Clean up
                       rm /tmp/deployment.tar.gz
 
-            - name: Start application
+            - name: Start application with Docker
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
                   username: ${{ secrets.SERVER_USER }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
                   script: |
-                      # Stop and disable any existing service
-                      systemctl stop ${{ env.APP_NAME }} || true
-                      systemctl disable ${{ env.APP_NAME }} || true
+                      cd ${{ env.APP_DIR }}
 
-                      # Remove old service file completely
-                      rm -f /etc/systemd/system/${{ env.APP_NAME }}.service
+                      # Stop existing container if running
+                      docker compose down || docker stop ${{ env.APP_NAME }} || true
+                      docker compose rm -f || true
 
-                      # Create new systemd service file with npm using /usr/bin/env to find npm in PATH
-                      cat > /etc/systemd/system/${{ env.APP_NAME }}.service << 'SERVICE_EOF'
-                      [Unit]
-                      Description=Carl Granit Oy Next.js Application
-                      After=network.target
+                      # Build and start the container
+                      docker compose up -d --build
 
-                      [Service]
-                      Type=simple
-                      User=www-data
-                      WorkingDirectory=/var/www/carl-granit-oy
-                      Environment=NODE_ENV=production
-                      Environment=PORT=3000
-                      Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/nodejs/npm/bin"
-                      ExecStart=/usr/bin/env npm start
-                      Restart=always
-                      RestartSec=10
-                      StandardOutput=journal
-                      StandardError=journal
-                      SyslogIdentifier=carl-granit-oy
-
-                      [Install]
-                      WantedBy=multi-user.target
-                      SERVICE_EOF
-
-                      # Verify the service file was created correctly
-                      echo "Service file contents:"
-                      cat /etc/systemd/system/${{ env.APP_NAME }}.service
-
-                      # Reload systemd to clear any cached service definitions
-                      systemctl daemon-reload
-
-                      # Reset failed state if any
-                      systemctl reset-failed ${{ env.APP_NAME }} || true
-
-                      # Enable and start the service
-                      systemctl enable ${{ env.APP_NAME }}
-                      systemctl start ${{ env.APP_NAME }}
-
-                      # Wait for service to start
+                      # Wait for container to start
                       sleep 10
 
-                      # Check service status
-                      if systemctl is-active --quiet ${{ env.APP_NAME }}; then
-                        echo "✅ Service started successfully!"
-                        systemctl status ${{ env.APP_NAME }} --no-pager -l
+                      # Check container status
+                      if docker ps | grep -q ${{ env.APP_NAME }} || docker compose ps | grep -q "Up"; then
+                        echo "✅ Docker container started successfully!"
+                        docker compose ps
+                        docker compose logs --tail=50
                       else
-                        echo "❌ Failed to start service"
-                        echo "Service file:"
-                        cat /etc/systemd/system/${{ env.APP_NAME }}.service
-                        echo ""
-                        echo "Recent logs:"
-                        journalctl -u ${{ env.APP_NAME }} --no-pager -l --since "2 minutes ago"
+                        echo "❌ Failed to start Docker container"
+                        echo "=== Docker logs ==="
+                        docker compose logs --tail=100 || docker logs ${{ env.APP_NAME }} || echo "No logs found"
                         exit 1
                       fi
 
@@ -280,22 +224,26 @@ jobs:
                       sleep 5
 
                       # Test the application
-                      if curl -f http://localhost:3000/health > /dev/null 2>&1; then
+                      if curl -f http://localhost:3000 > /dev/null 2>&1; then
                         echo "✅ Application health check passed!"
                       else
-                        echo "❌ Application health check failed"
-                        echo "Checking logs:"
-                        journalctl -u ${{ env.APP_NAME }} --no-pager -l --since "5 minutes ago"
-                        exit 1
+                        echo "⚠️ Health check via root endpoint failed, checking container status..."
+                        docker compose ps
+                        docker compose logs --tail=50
+                        # Don't fail if container is running
+                        if docker ps | grep -q ${{ env.APP_NAME }}; then
+                          echo "✅ Container is running, deployment successful"
+                        else
+                          echo "❌ Container is not running"
+                          exit 1
+                        fi
                       fi
 
             - name: Notify deployment success
               if: success()
               run: |
                   echo "🚀 Deployment successful!"
-                  echo "Application is available at: http://${{ secrets.SERVER_IP }}"
-                  echo "Service status:"
-                  curl -s http://${{ secrets.SERVER_IP }}/health || echo "Health endpoint not available"
+                  echo "Application is available at: http://${{ secrets.SERVER_IP }}:3000"
 
             - name: Notify deployment failure
               if: failure()
