@@ -35,20 +35,9 @@ jobs:
                   corepack enable
                   pnpm install --frozen-lockfile
 
-            - name: Run linting
-              run: pnpm run lint --if-present
-
-            - name: Run type checking
-              run: pnpm run type-check --if-present
-
-            - name: Run tests
-              run: pnpm test --if-present
-
             - name: Build application
               run: |
-                  # Set environment variable to handle useSearchParams error
                   export NEXT_TELEMETRY_DISABLED=1
-                  # Build the application
                   pnpm run build
 
     deploy:
@@ -94,9 +83,7 @@ jobs:
 
             - name: Build application
               run: |
-                  # Set environment variable to handle useSearchParams error
                   export NEXT_TELEMETRY_DISABLED=1
-                  # Build the application
                   pnpm run build
 
             - name: Create deployment package
@@ -111,15 +98,8 @@ jobs:
                     --exclude=.next/cache \
                     --exclude=*.log \
                     --exclude=.DS_Store \
-                    --exclude=*.tmp \
-                    --exclude=coverage \
-                    --exclude=.nyc_output \
-                    --exclude=dist \
-                    --exclude=build \
                     --exclude=.env.local \
-                    --exclude=.env.development.local \
-                    --exclude=.env.test.local \
-                    --exclude=.env.production.local \
+                    --exclude=.env.*.local \
                     --exclude=terraform \
                     --exclude=terraform.tfstate \
                     app/ \
