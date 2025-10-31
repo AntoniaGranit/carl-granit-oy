@@ -8,14 +8,11 @@ WORKDIR /app
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 
-# Install all dependencies (including devDependencies for build)
-RUN pnpm install --frozen-lockfile
+# Install only production dependencies
+RUN pnpm install --prod --frozen-lockfile
 
-# Copy application files
+# Copy pre-built application files from CI
 COPY . .
-
-# Build the application
-RUN pnpm run build
 
 EXPOSE 3000
 

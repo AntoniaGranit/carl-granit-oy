@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
 
-export default function VihkiJaTimanttiSormukset() {
+function RingContent() {
 	const searchParams = useSearchParams()
 	const [selectedRing, setSelectedRing] = useState("9161-9172")
 
@@ -24,5 +24,13 @@ export default function VihkiJaTimanttiSormukset() {
 			height={600}
 			style={{ maxWidth: "100%", height: "auto" }}
 		/>
+	)
+}
+
+export default function VihkiJaTimanttiSormukset() {
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<RingContent />
+		</Suspense>
 	)
 }
