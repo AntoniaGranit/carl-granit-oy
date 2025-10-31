@@ -253,34 +253,34 @@ jobs:
                   key: ${{ secrets.SERVER_SSH_KEY }}
                   script: |
                       echo "⚠️ Deployment failed, initiating rollback..."
-                      
+
                       # Find the most recent backup
                       LATEST_BACKUP=$(ls -t /var/backups/${{ env.APP_NAME }} 2>/dev/null | head -n 1)
-                      
+
                       if [ -z "$LATEST_BACKUP" ]; then
                         echo "⚠️ No backup found, cannot rollback"
                         echo "This might be the first deployment"
                         exit 0
                       fi
-                      
+
                       echo "Rolling back to: $LATEST_BACKUP"
-                      
+
                       # Stop current failed container
                       cd ${{ env.APP_DIR }}
                       docker compose down || true
-                      
+
                       # Restore from backup
                       cd /var/backups/${{ env.APP_NAME }}/$LATEST_BACKUP
-                      
+
                       # Start the backed up version
                       docker compose up -d || {
                         echo "❌ Rollback failed - backup may be corrupted"
                         exit 1
                       }
-                      
+
                       # Wait and verify rollback
                       sleep 10
-                      
+
                       if docker ps | grep -q ${{ env.APP_NAME }}; then
                         echo "✅ Rollback successful!"
                         echo "Application restored to previous version"
