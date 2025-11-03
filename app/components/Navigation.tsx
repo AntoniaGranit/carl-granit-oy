@@ -80,7 +80,7 @@ export default function Navigation() {
 							<Link href="/muut-timanttikorut?jewelry=Tappikorvakorut_syksy25">
 								Tappikorvakorut
 							</Link>
-							<Link href="/muut-timanttikorut?jewelry=Muut_korvakorut_syksy25">
+							<Link href="/muut-timanttikorut?jewelry=Muut_Korvakorut_syksy25">
 								Muut Korvakorut
 							</Link>
 							<Link href="/muut-timanttikorut?jewelry=Timantti_Riipukset_syksy25">
