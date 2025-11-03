@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import Header from "./components/Header"
 import Footer from "./components/Footer"
@@ -6,7 +6,11 @@ import Footer from "./components/Footer"
 export const metadata: Metadata = {
 	title: "Brilliancy Line",
 	description: "Brilliancy Line - Timanttikorut ja sormukset",
-	viewport: "width=device-width, initial-scale=1.0",
+}
+
+export const viewport: Viewport = {
+	width: "device-width",
+	initialScale: 1.0,
 }
 
 export default function RootLayout({

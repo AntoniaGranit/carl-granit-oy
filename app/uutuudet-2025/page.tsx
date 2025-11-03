@@ -4,7 +4,7 @@ export default function Uutuudet2025() {
 	return (
 		<Image
 			loading="lazy"
-			src="/images/Uutuudet_syksy25.jpg"
+			src="/images/Uutuudet_Syksy_25.jpg"
 			alt="Uutuudet syksy 2025"
 			width={1000}
 			height={600}
