@@ -11,12 +11,23 @@ coverage
 .nyc_output
 dist
 build
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*
+!.env.example
 terraform.tfstate
 terraform.tfstate.backup
 *.md
 !README.md
+package-lock.json
+yarn.lock
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.dockerignore
+Dockerfile
+docker-compose.yml
+DEPENDENCY_AUDIT.md
+SECURITY_HARDENING.md
+todo.md
 
