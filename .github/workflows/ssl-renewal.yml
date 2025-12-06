@@ -21,19 +21,18 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            # Check if certificate needs renewal (expires in 30 days)
-            if certbot certificates --domain ${{ env.DOMAIN }} | grep -q "VALID: 30 days"; then
-              echo "Certificate expires in 30 days or less, attempting renewal..."
+            CERT_INFO=$(certbot certificates --domain ${{ env.DOMAIN }} 2>/dev/null)
+            DAYS_UNTIL_EXPIRY=$(echo "$CERT_INFO" | grep -oP 'VALID: \K\d+' || echo "999")
+
+            if [ "$DAYS_UNTIL_EXPIRY" -le 30 ]; then
+              echo "Certificate expires in $DAYS_UNTIL_EXPIRY days (30 or less), attempting renewal..."
               
-              # Attempt renewal
               if certbot renew --quiet --non-interactive; then
                 echo "✅ SSL certificate renewed successfully!"
                 
-                # Reload nginx
                 systemctl reload nginx
                 echo "✅ Nginx reloaded with new certificate"
                 
-                # Test the site
                 if curl -f https://${{ env.DOMAIN }} > /dev/null 2>&1; then
                   echo "✅ Site is accessible with new certificate"
                 else
@@ -45,7 +44,7 @@ jobs:
                 exit 1
               fi
             else
-              echo "Certificate is still valid, no renewal needed"
+              echo "Certificate is still valid ($DAYS_UNTIL_EXPIRY days remaining), no renewal needed"
             fi
 
       - name: Notify renewal status
