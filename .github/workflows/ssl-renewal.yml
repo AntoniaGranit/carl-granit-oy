@@ -18,8 +18,8 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          username: ci
+          key: ${{ secrets.CI_SSH_KEY }}
           script: |
             CERT_INFO=$(certbot certificates --domain ${{ env.DOMAIN }} 2>/dev/null)
             DAYS_UNTIL_EXPIRY=$(echo "$CERT_INFO" | grep -oP 'VALID: \K\d+' || echo "999")

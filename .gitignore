@@ -28,6 +28,7 @@ terraform.tfstate
 terraform.tfstate.backup
 .terraform
 .terraform.lock.hcl
+*.tfvars
 
 deployment.tar.gz
 *.tar.gz

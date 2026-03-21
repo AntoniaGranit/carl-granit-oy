@@ -22,8 +22,8 @@ jobs:
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   script: |
                       echo "Available backups:"
                       ls -la ${{ env.BACKUP_DIR }} || echo "No backups found"
@@ -32,8 +32,8 @@ jobs:
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   script: |
                       if [ ! -d "${{ env.BACKUP_DIR }}/${{ github.event.inputs.backup_name }}" ]; then
                         echo "❌ Backup ${{ github.event.inputs.backup_name }} not found!"
@@ -47,8 +47,8 @@ jobs:
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   script: |
                       # Create backup of current state before rollback
                       CURRENT_BACKUP="rollback-backup-$(date +%Y%m%d-%H%M%S)"
@@ -61,18 +61,18 @@ jobs:
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   script: |
-                      systemctl stop ${{ env.APP_NAME }} || true
+                      cd ${{ env.APP_DIR }} && docker compose down || true
                       echo "✅ Application stopped"
 
             - name: Perform rollback
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   script: |
                       # Remove current application
                       rm -rf ${{ env.APP_DIR }}
@@ -90,20 +90,21 @@ jobs:
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   script: |
-                      systemctl start ${{ env.APP_NAME }}
-                      systemctl enable ${{ env.APP_NAME }}
+                      cd ${{ env.APP_DIR }}
+                      docker compose up -d --build
 
-                      # Wait for service to start
+                      # Wait for container to start
                       sleep 10
 
-                      if systemctl is-active --quiet ${{ env.APP_NAME }}; then
+                      if docker ps | grep -q ${{ env.APP_NAME }}; then
                         echo "✅ Application started successfully after rollback"
+                        docker compose ps
                       else
                         echo "❌ Failed to start application after rollback"
-                        journalctl -u ${{ env.APP_NAME }} --no-pager -l
+                        docker compose logs --tail=50
                         exit 1
                       fi
 
@@ -111,16 +112,16 @@ jobs:
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   script: |
                       sleep 5
 
-                      if curl -f http://localhost:3000/health > /dev/null 2>&1; then
+                      if curl -f http://localhost:3000/api/health > /dev/null 2>&1; then
                         echo "✅ Health check passed after rollback"
                       else
                         echo "❌ Health check failed after rollback"
-                        journalctl -u ${{ env.APP_NAME }} --no-pager -l --since "5 minutes ago"
+                        docker compose -f ${{ env.APP_DIR }}/docker-compose.yml logs --tail=50
                         exit 1
                       fi
 

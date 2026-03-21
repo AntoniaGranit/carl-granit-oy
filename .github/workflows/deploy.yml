@@ -52,12 +52,8 @@ jobs:
                     echo "❌ SERVER_IP secret is not set"
                     exit 1
                   fi
-                  if [ -z "${{ secrets.SERVER_USER }}" ]; then
-                    echo "❌ SERVER_USER secret is not set"
-                    exit 1
-                  fi
-                  if [ -z "${{ secrets.SERVER_SSH_KEY }}" ]; then
-                    echo "❌ SERVER_SSH_KEY secret is not set"
+                  if [ -z "${{ secrets.CI_SSH_KEY }}" ]; then
+                    echo "❌ CI_SSH_KEY secret is not set"
                     exit 1
                   fi
                   echo "✅ All required secrets are present"
@@ -122,8 +118,8 @@ jobs:
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   script: |
                       # Create backup
                       if [ -d "${{ env.APP_DIR }}" ]; then
@@ -143,8 +139,8 @@ jobs:
               uses: appleboy/scp-action@v0.1.7
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   source: "deployment.tar.gz"
                   target: "/tmp/"
 
@@ -152,8 +148,8 @@ jobs:
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   script: |
                       cd ${{ env.APP_DIR }}
 
@@ -167,8 +163,8 @@ jobs:
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   script: |
                       cd ${{ env.APP_DIR }}
 
@@ -198,8 +194,8 @@ jobs:
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   script: |
                       # Wait for application to fully start
                       echo "Waiting for application to start..."
@@ -224,7 +220,7 @@ jobs:
                         fi
 
                         # Test HTTP endpoint
-                        if curl -f -s -o /dev/null -w "%{http_code}" http://localhost:3000 | grep -q "200"; then
+                        if curl -f -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health | grep -q "200"; then
                           echo "✅ Application health check passed!"
                           HEALTH_CHECK_PASSED=true
                           break
@@ -249,8 +245,8 @@ jobs:
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.SERVER_IP }}
-                  username: ${{ secrets.SERVER_USER }}
-                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  username: ci
+                  key: ${{ secrets.CI_SSH_KEY }}
                   script: |
                       echo "⚠️ Deployment failed, initiating rollback..."
 
