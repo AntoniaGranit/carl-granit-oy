@@ -5,7 +5,7 @@ import { cormorant, uiSans } from "@/app/fonts"
 export default function Home() {
 	return (
 		<div className="relative flex w-full flex-1 flex-col">
-			<div className="relative isolate min-h-[calc(100dvh-5rem)] w-full flex-1 md:min-h-[calc(100dvh-6rem)]">
+			<div className="relative isolate flex-1 w-full overflow-hidden">
 				<Image
 					src="/images/landing_image.png"
 					alt="Brilliancy Line"
@@ -18,7 +18,7 @@ export default function Home() {
 					className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/30 via-black/5 to-black/25"
 					aria-hidden
 				/>
-				<div className="relative z-10 flex min-h-[calc(100dvh-5rem)] items-center justify-end px-6 py-10 md:min-h-[calc(100dvh-6rem)] md:px-12 md:py-14 lg:px-20">
+				<div className="absolute inset-0 z-10 flex min-h-0 items-center justify-end px-6 py-0 md:px-12 md:py-0 lg:px-20">
 					<div
 						className={`w-full max-w-md md:max-w-lg ${uiSans.className}`}
 					>

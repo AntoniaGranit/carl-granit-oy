@@ -16,14 +16,17 @@ function RingContent() {
 	}, [searchParams])
 
 	return (
-		<Image
-			loading="lazy"
-			src={`/images/Vihki_timantti/${selectedRing}_syksy25.jpg`}
-			alt={`Ring collection ${selectedRing}`}
-			width={1000}
-			height={600}
-			style={{ maxWidth: "100%", height: "auto" }}
-		/>
+		<div className="flex justify-center">
+			<Image
+				loading="lazy"
+				src={`/images/Vihki_timantti/${selectedRing}_syksy25.jpg`}
+				alt={`Ring collection ${selectedRing}`}
+				width={1000}
+				height={600}
+				className="mx-auto"
+				style={{ maxWidth: "100%", height: "auto" }}
+			/>
+		</div>
 	)
 }
 
