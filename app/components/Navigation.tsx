@@ -129,8 +129,8 @@ export default function Navigation() {
 							className={`absolute left-1/2 top-full z-[1001] min-w-[240px] -translate-x-1/2 pt-1 ${showVihkiDropdown ? "pointer-events-auto block" : "pointer-events-none hidden"}`}
 						>
 							<div className="border border-[#e5e7eb] bg-white shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
-								<SubmenuLink href="/sormukset?ring=9161-9172">
-									9161–9172
+								<SubmenuLink href="/sormukset?ring=9161-9179">
+									9161–9179
 								</SubmenuLink>
 								<SubmenuLink href="/sormukset?ring=9127-9159">
 									9127–9159
@@ -166,13 +166,13 @@ export default function Navigation() {
 							className={`absolute left-1/2 top-full z-[1001] min-w-[240px] -translate-x-1/2 pt-1 ${showMuutDropdown ? "pointer-events-auto block" : "pointer-events-none hidden"}`}
 						>
 							<div className="border border-[#e5e7eb] bg-white shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
-								<SubmenuLink href="/muut-timanttikorut?jewelry=Tappikorvakorut_syksy25">
+								<SubmenuLink href="/muut-timanttikorut?jewelry=Tappikorvakorut_kevat26">
 									Tappikorvakorut
 								</SubmenuLink>
-								<SubmenuLink href="/muut-timanttikorut?jewelry=Muut_Korvakorut_syksy25">
+								<SubmenuLink href="/muut-timanttikorut?jewelry=Muut_Korvakorut_kevat26">
 									Muut korvakorut
 								</SubmenuLink>
-								<SubmenuLink href="/muut-timanttikorut?jewelry=Timantti_Riipukset_syksy25">
+								<SubmenuLink href="/muut-timanttikorut?jewelry=Timantti_Riipukset_kevat26">
 									Timanttiriipukset
 								</SubmenuLink>
 							</div>
@@ -213,7 +213,9 @@ export default function Navigation() {
 						onClick={() => setIsMenuOpen(!isMenuOpen)}
 						className={`p-2 transition-colors hover:text-[#0f172a] focus-visible:outline-none focus-visible:text-[#0f172a] ${muted}`}
 						aria-expanded={isMenuOpen}
-						aria-label={isMenuOpen ? "Sulje valikko" : "Avaa valikko"}
+						aria-label={
+							isMenuOpen ? "Sulje valikko" : "Avaa valikko"
+						}
 					>
 						<i
 							className={
@@ -232,7 +234,9 @@ export default function Navigation() {
 						<button
 							type="button"
 							onClick={() =>
-								setShowMobileRingsDropdown(!showMobileRingsDropdown)
+								setShowMobileRingsDropdown(
+									!showMobileRingsDropdown,
+								)
 							}
 							className={`flex w-full items-center justify-between px-3 py-3 text-left text-[16px] font-medium tracking-wide transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a] focus-visible:outline-none focus-visible:text-[#0f172a] ${isRings || showMobileRingsDropdown ? navy : muted}`}
 						>
@@ -245,10 +249,10 @@ export default function Navigation() {
 							className={`${showMobileRingsDropdown ? "block border-l-2 border-[#e5e7eb] ml-2" : "hidden"}`}
 						>
 							<SubmenuLink
-								href="/sormukset?ring=9161-9172"
+								href="/sormukset?ring=9161-9179"
 								onNavigate={closeMobile}
 							>
-								9161–9172
+								9161–9179
 							</SubmenuLink>
 							<SubmenuLink
 								href="/sormukset?ring=9127-9159"
@@ -285,7 +289,9 @@ export default function Navigation() {
 						<button
 							type="button"
 							onClick={() =>
-								setShowMobileMuutDropdown(!showMobileMuutDropdown)
+								setShowMobileMuutDropdown(
+									!showMobileMuutDropdown,
+								)
 							}
 							className={`flex w-full items-center justify-between px-3 py-3 text-left text-[16px] font-medium tracking-wide transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a] focus-visible:outline-none focus-visible:text-[#0f172a] ${isMuut || showMobileMuutDropdown ? navy : muted}`}
 						>
@@ -298,19 +304,19 @@ export default function Navigation() {
 							className={`${showMobileMuutDropdown ? "block border-l-2 border-[#e5e7eb] ml-2" : "hidden"}`}
 						>
 							<SubmenuLink
-								href="/muut-timanttikorut?jewelry=Tappikorvakorut_syksy25"
+								href="/muut-timanttikorut?jewelry=Tappikorvakorut_kevat26"
 								onNavigate={closeMobile}
 							>
 								Tappikorvakorut
 							</SubmenuLink>
 							<SubmenuLink
-								href="/muut-timanttikorut?jewelry=Muut_Korvakorut_syksy25"
+								href="/muut-timanttikorut?jewelry=Muut_Korvakorut_kevat26"
 								onNavigate={closeMobile}
 							>
 								Muut korvakorut
 							</SubmenuLink>
 							<SubmenuLink
-								href="/muut-timanttikorut?jewelry=Timantti_Riipukset_syksy25"
+								href="/muut-timanttikorut?jewelry=Timantti_Riipukset_kevat26"
 								onNavigate={closeMobile}
 							>
 								Timanttiriipukset

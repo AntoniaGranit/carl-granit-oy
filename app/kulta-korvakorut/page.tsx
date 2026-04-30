@@ -5,7 +5,7 @@ export default function KultaKorvakorut() {
 		<div className="flex justify-center">
 			<Image
 				loading="lazy"
-				src="/images/Zirk_25.jpg"
+				src="/images/Zirk_26.jpg"
 				alt="Kulta korvakorut"
 				width={1000}
 				height={600}

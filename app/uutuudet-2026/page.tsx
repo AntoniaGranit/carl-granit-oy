@@ -1,12 +1,12 @@
 import Image from "next/image"
 
-export default function Uutuudet2025() {
+export default function Uutuudet2026() {
 	return (
 		<div className="flex justify-center">
 			<Image
 				loading="lazy"
-				src="/images/Uutuudet_Syksy_25.jpg"
-				alt="Uutuudet syksy 2025"
+				src="/images/Uutuudet_Kevat_26.jpg"
+				alt="Uutuudet kevät 2026"
 				width={1000}
 				height={600}
 				className="mx-auto"
