@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation"
 function MuutTimanttikorutContent() {
 	const searchParams = useSearchParams()
 	const [selectedJewelry, setSelectedJewelry] = useState(
-		"Tappikorvakorut_syksy25"
+		"Tappikorvakorut_kevat26",
 	)
 
 	useEffect(() => {

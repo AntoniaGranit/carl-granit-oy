@@ -35,7 +35,7 @@ export default function Home() {
 							aria-label="Etusivun linkit"
 						>
 							<Link
-								href="/uutuudet-2025"
+								href="/uutuudet-2026"
 								className="inline-flex min-h-12 items-center justify-center border border-transparent bg-white px-8 py-3 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#0f172a] shadow-[0_4px_24px_rgba(0,0,0,0.12)] transition hover:bg-white/95 hover:shadow-[0_6px_28px_rgba(0,0,0,0.18)]"
 							>
 								Uutuudet kevät 2026
