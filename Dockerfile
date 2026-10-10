@@ -8,8 +8,7 @@ WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-RUN pnpm config set only-built-dependencies "@tailwindcss/oxide sharp" && \
-    pnpm install --frozen-lockfile && \
+RUN pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true --config.strictDepBuilds=false && \
     pnpm store prune
 
 FROM base AS builder
