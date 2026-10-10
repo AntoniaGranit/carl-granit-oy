@@ -5,8 +5,8 @@ export default function Jalleenmyyjat() {
 		<div className="flex justify-center">
 			<Image
 				loading="lazy"
-				src="/images/Jalleenmyyjat_syksy25.jpg"
-				alt="Jälleenmyyjät syksy 2025"
+				src="/images/Jalleenmyyjat.jpg"
+				alt="Jälleenmyyjät"
 				width={1000}
 				height={600}
 				className="mx-auto"

@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation"
 
 function RingContent() {
 	const searchParams = useSearchParams()
-	const [selectedRing, setSelectedRing] = useState("9161-9179")
+	const [selectedRing, setSelectedRing] = useState("9161-9193")
 
 	useEffect(() => {
 		const ringParam = searchParams.get("ring")
@@ -19,7 +19,7 @@ function RingContent() {
 		<div className="flex justify-center">
 			<Image
 				loading="lazy"
-				src={`/images/Vihki_timantti/${selectedRing}_kevat26.jpg`}
+				src={`/images/Vihki_timantti/${selectedRing}.jpg`}
 				alt={`Ring collection ${selectedRing}`}
 				width={1000}
 				height={600}
