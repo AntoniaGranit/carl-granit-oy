@@ -129,8 +129,8 @@ export default function Navigation() {
 							className={`absolute left-1/2 top-full z-[1001] min-w-[240px] -translate-x-1/2 pt-1 ${showVihkiDropdown ? "pointer-events-auto block" : "pointer-events-none hidden"}`}
 						>
 							<div className="border border-[#e5e7eb] bg-white shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
-								<SubmenuLink href="/sormukset?ring=9161-9179">
-									9161–9179
+								<SubmenuLink href="/sormukset?ring=9161-9193">
+									9161–9193
 								</SubmenuLink>
 								<SubmenuLink href="/sormukset?ring=9127-9159">
 									9127–9159
@@ -166,7 +166,7 @@ export default function Navigation() {
 							className={`absolute left-1/2 top-full z-[1001] min-w-[240px] -translate-x-1/2 pt-1 ${showMuutDropdown ? "pointer-events-auto block" : "pointer-events-none hidden"}`}
 						>
 							<div className="border border-[#e5e7eb] bg-white shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
-								<SubmenuLink href="/muut-timanttikorut?jewelry=Tappikorvakorut_kevat26">
+								<SubmenuLink href="/muut-timanttikorut?jewelry=Tappikorvakorut_syksy26">
 									Tappikorvakorut
 								</SubmenuLink>
 								<SubmenuLink href="/muut-timanttikorut?jewelry=Muut_Korvakorut_kevat26">
@@ -249,10 +249,10 @@ export default function Navigation() {
 							className={`${showMobileRingsDropdown ? "block border-l-2 border-[#e5e7eb] ml-2" : "hidden"}`}
 						>
 							<SubmenuLink
-								href="/sormukset?ring=9161-9179"
+								href="/sormukset?ring=9161-9193"
 								onNavigate={closeMobile}
 							>
-								9161–9179
+								9161–9193
 							</SubmenuLink>
 							<SubmenuLink
 								href="/sormukset?ring=9127-9159"
@@ -304,7 +304,7 @@ export default function Navigation() {
 							className={`${showMobileMuutDropdown ? "block border-l-2 border-[#e5e7eb] ml-2" : "hidden"}`}
 						>
 							<SubmenuLink
-								href="/muut-timanttikorut?jewelry=Tappikorvakorut_kevat26"
+								href="/muut-timanttikorut?jewelry=Tappikorvakorut_syksy26"
 								onNavigate={closeMobile}
 							>
 								Tappikorvakorut

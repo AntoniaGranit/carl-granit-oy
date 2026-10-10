@@ -23,7 +23,7 @@ export default function Home() {
 						className={`w-full max-w-md md:max-w-lg ${uiSans.className}`}
 					>
 						<p className="text-left text-[11px] font-semibold uppercase tracking-[0.32em] text-white/90 drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)] md:text-xs">
-							Carl Granit Oy · Kevät 2026
+							Carl Granit Oy · Syksy 2026
 						</p>
 						<h1
 							className={`${cormorant.className} mt-4 text-left text-4xl font-medium leading-[1.1] tracking-[0.02em] text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.35)] md:text-5xl lg:text-6xl`}
@@ -38,7 +38,7 @@ export default function Home() {
 								href="/uutuudet-2026"
 								className="inline-flex min-h-12 items-center justify-center border border-transparent bg-white px-8 py-3 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#0f172a] shadow-[0_4px_24px_rgba(0,0,0,0.12)] transition hover:bg-white/95 hover:shadow-[0_6px_28px_rgba(0,0,0,0.18)]"
 							>
-								Uutuudet kevät 2026
+								Uutuudet Syksy 2026
 							</Link>
 							<Link
 								href="/lab-timantit"

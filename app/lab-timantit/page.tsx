@@ -5,8 +5,8 @@ export default function LabTimantit() {
 		<div className="flex justify-center">
 			<Image
 				loading="lazy"
-				src="/images/LAB2026.jpg"
-				alt="Lab Timantit kevät 2026"
+				src="/images/Lab Tim.jpg"
+				alt="Lab Timantit syksy 2026"
 				width={1000}
 				height={600}
 				className="mx-auto"
