@@ -18,6 +18,12 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            - name: Validate backup name
+              env:
+                  BACKUP_NAME: ${{ github.event.inputs.backup_name }}
+              run: |
+                  [[ "$BACKUP_NAME" =~ ^(rollback-)?backup-[0-9]{8}-[0-9]{6}$ ]] || { echo "Invalid backup name"; exit 1; }
+
             - name: List available backups
               uses: appleboy/ssh-action@v1.0.3
               with:
@@ -94,7 +100,8 @@ jobs:
                   key: ${{ secrets.CI_SSH_KEY }}
                   script: |
                       cd ${{ env.APP_DIR }}
-                      docker compose up -d --build
+                      docker compose build --pull
+                      docker compose up -d
 
                       # Wait for container to start
                       sleep 10

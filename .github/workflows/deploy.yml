@@ -8,7 +8,7 @@ on:
     workflow_dispatch:
 
 env:
-    NODE_VERSION: "24.x"
+    NODE_VERSION: "24.22.1"
     APP_NAME: "carl-granit-oy"
     APP_DIR: "/var/www/carl-granit-oy"
 
@@ -22,7 +22,7 @@ jobs:
             - name: Setup pnpm
               uses: pnpm/action-setup@v2
               with:
-                  version: latest
+                  version: 10.28.0
 
             - name: Setup Node.js
               uses: actions/setup-node@v4
@@ -64,7 +64,7 @@ jobs:
             - name: Setup pnpm
               uses: pnpm/action-setup@v2
               with:
-                  version: latest
+                  version: 10.28.0
 
             - name: Setup Node.js
               uses: actions/setup-node@v4
@@ -174,7 +174,8 @@ jobs:
                       docker compose rm -f || true
 
                       # Build and start the container
-                      docker compose up -d --build
+                      docker compose build --pull
+                      docker compose up -d
 
                       # Wait for container to start
                       sleep 10

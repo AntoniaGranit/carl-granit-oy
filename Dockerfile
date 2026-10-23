@@ -1,6 +1,6 @@
-FROM node:24-alpine AS base
+FROM node:24.22.1-alpine AS base
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
 
 FROM base AS deps
 
@@ -8,7 +8,7 @@ WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-RUN pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true --config.strictDepBuilds=false && \
+RUN pnpm install --frozen-lockfile --config.strictDepBuilds=false && \
     pnpm store prune
 
 FROM base AS builder
@@ -44,4 +44,3 @@ USER nextjs
 EXPOSE 3000
 
 CMD ["node_modules/.bin/next", "start"]
-
